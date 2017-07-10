@@ -1,12 +1,12 @@
 //var REMOTEPATH = "http://localhost:7777/";
 //var REMOTEPATH = "http://192.168.0.156:7777/";
 var REMOTEPATH = "/";
-var ROOTPATH = "http://192.168.0.127:8888/html/";
+var ROOTPATH = "http://xxxx:8888/html/";
 var REPLACESTR = "/data/spider_cluster/data/snapshot/html/";
-//var ROOTPATH = "http://192.168.0.127:9999/html/";
+//var ROOTPATH = "http://xxxx:9999/html/";
 //var REPLACESTR = "/data/spider_cluster/test/snapshot/html/";
 
-var SUBSCRIBE_REMOTEPATH = "http://subscribe.dangmeitoutiao.com/";
+var SUBSCRIBE_REMOTEPATH = "http://xxxx:8080/";
 
 /**
  * 状态码值转换
