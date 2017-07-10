@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>配置文件系统</title>
+    <link rel="stylesheet" type="text/css" href="/css/monitor.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/jquery.jsonview.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/plugin/jstree/themes/default/style.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/site_config.css"/>
+    <!--  <script type="text/javascript" src="/js/angular.min.js"></script>-->
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.jsonview.min.js"></script>
+    <script type="text/javascript" src="/plugin/jstree/jstree.min.js"></script>
+</head>
+
+<body>
+<div id="container" role="main" style="height: 600px;">
+    <div style="height: 30px;">
+        <button class="btn green" id="collapse_all">展开</button>
+        <button class="btn green" id="expand_all">合并</button>
+        <button class="btn green" id="sync_site">同步</button>
+        <input type="text" value=""
+               style="box-shadow:inset 0 0 4px #eee; width:150px; margin:0; padding:6px 12px; border-radius:4px; border:1px solid silver; font-size:1.1em;"
+               id="search_site" placeholder="Search">
+    </div>
+    <div id="tree" class="jstree jstree-1 jstree-default jstree-default-small" role="tree" aria-multiselectable="true"
+         tabindex="0" aria-activedescendant="Legal/aaaa" aria-busy="false" style="height: 600px;">
+        <ul class="jstree-container-ul jstree-children jstree-striped jstree-contextmenu" role="group">
+            <li role="treeitem" aria-selected="false" aria-level="1" aria-labelledby="/_anchor" aria-disabled="true"
+                aria-expanded="true" id="/" class="jstree-node  jstree-open jstree-last"><i
+                    class="jstree-icon jstree-ocl" role="presentation"></i><a class="jstree-anchor  jstree-disabled"
+                                                                              href="#" tabindex="-1" id="/_anchor"><i
+                    class="jstree-icon jstree-themeicon folder jstree-themeicon-custom" role="presentation"></i>root</a>
+                <ul role="group" class="jstree-children">
+                    <li role="treeitem" aria-selected="false" aria-level="2" aria-labelledby="HR_anchor"
+                        aria-expanded="true" id="HR" class="jstree-node jstree-open" aria-busy="false"><i
+                            class="jstree-icon jstree-ocl" role="presentation"></i><a class="jstree-anchor" href="#"
+                                                                                      tabindex="-1" id="HR_anchor"><i
+                            class="jstree-icon jstree-themeicon folder jstree-themeicon-custom" role="presentation"></i>HR</a>
+                        <ul role="group" class="jstree-children">
+                            <li role="treeitem" aria-selected="false" aria-level="3"
+                                aria-labelledby="HR/New nodefds_anchor" aria-expanded="false" id="HR/New nodefds"
+                                class="jstree-node  jstree-closed jstree-last"><i class="jstree-icon jstree-ocl"
+                                                                                  role="presentation"></i><a
+                                    class="jstree-anchor" href="#" tabindex="-1" id="HR/New nodefds_anchor"><i
+                                    class="jstree-icon jstree-themeicon folder jstree-themeicon-custom"
+                                    role="presentation"></i>New nodefds</a></li>
+                        </ul>
+                    </li>
+                    <li role="treeitem" aria-selected="false" aria-level="2" aria-labelledby="Legal_anchor"
+                        aria-expanded="true" id="Legal" class="jstree-node  jstree-last jstree-open" aria-busy="false">
+                        <i class="jstree-icon jstree-ocl" role="presentation"></i><a class="jstree-anchor" href="#"
+                                                                                     tabindex="-1" id="Legal_anchor"><i
+                            class="jstree-icon jstree-themeicon folder jstree-themeicon-custom" role="presentation"></i>Legal</a>
+                        <ul role="group" class="jstree-children">
+                            <li role="treeitem" aria-selected="true" aria-level="3" aria-labelledby="Legal/aaaa_anchor"
+                                aria-expanded="false" id="Legal/aaaa" class="jstree-node  jstree-closed jstree-last"><i
+                                    class="jstree-icon jstree-ocl" role="presentation"></i><a
+                                    class="jstree-anchor jstree-clicked" href="#" tabindex="-1" id="Legal/aaaa_anchor"
+                                    style="touch-action: none;"><i
+                                    class="jstree-icon jstree-themeicon folder jstree-themeicon-custom"
+                                    role="presentation"></i>aaaa</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div id="data" style="height: 600px;">
+        <div style=" height: 30px;">
+            <center>
+                <button class="btn green" id="update_site">修改</button>
+                <button class="btn green" id="save_site">保存</button>
+               <!-- <button class="btn green" id="publish_site">推送抓取</button>-->
+            </center>
+        </div>
+        <div style="display: none">
+            <input type="hidden" id="site_path"/>
+        </div>
+        <div class="content code" style="display: none; height: 600px;" id="code">
+        </div>
+        <div class="content folder" style="display: none; height: 600px;"></div>
+        <div class="content image" style="display: none; position: relative; height: 600px;"><img src="" alt=""
+                                                                                                  style="display:block; position:absolute; left:50%; top:50%; padding:0; max-height:90%; max-width:90%;">
+        </div>
+        <div class="content default" style="text-align: center; height: 600px; line-height: 600px; display: block;">
+            Legal/aaaa
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+
+        var condition = location.href.match(/condition=(.*)/);
+        if (condition && condition[1] != ('undefined')) {
+            $('#search_site').val(condition[1]);
+        }
+
+        $('#collapse_all').click(function () {
+            $('#tree').jstree().open_all();
+            var marginLeft = parseInt($('#tree').css('width').split('px')[0]) + 10;
+            $('#data').css('margin-left', marginLeft + 'px');
+        })
+
+        $('#expand_all').click(function () {
+            $('#tree').jstree().close_all();
+            var marginLeft = parseInt($('#tree').css('width').split('px')[0]) + 10;
+            $('#data').css('margin-left', marginLeft + 'px');
+        })
+
+        $('#update_site').click(function () {
+            $(".jsonview").hide();
+            $("#codeEdit").show();
+        });
+
+        $('#publish_site').click(function () {
+            var content = $("#codeEdit").val();
+            if (content) {
+                var reqJson = {};
+                reqJson.content = content;
+                $.ajax({
+                    type: "POST",
+                    url: REMOTEPATH + 'publisher/publish',
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(reqJson),
+                    success: function (message) {
+                        if (message && message.code == 1) {
+                            alert("推送成功");
+                        } else {
+                            alert("推送失败");
+                        }
+                    },
+                    error: function (message) {
+                        alert("推送失败");
+                    }
+                });
+            }
+        });
+
+        $('#sync_site').click(function () {
+            $.get(REMOTEPATH + 'siteConfig/svnSync')
+                    .done(function (d) {
+                        alert('同步成功');
+                        location.reload();
+                    })
+                    .fail(function (e) {
+                        alert('同步失败');
+                    });
+        });
+
+        $('#save_site').click(function () {
+            var content = $("#codeEdit").val();
+            var path = $("#site_path").val();
+            var reqJson = {};
+            reqJson.path = path;
+            reqJson.content = content;
+            $.ajax({
+                type: "POST",
+                url: REMOTEPATH + "siteConfig/saveSiteFile",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(reqJson),
+                success: function (message) {
+                    if (message) {
+                        try {
+                            $('#code').html('');
+                            $('#data .code').show();
+                            $('#code').JSONView($.parseJSON(content));
+                        } catch (e) {
+                            $(".jsonview").hide();
+                            $('#code').append('<h4 style="color: red;">json format error , ' + e + '</h4>');
+                        }
+                    }
+                },
+                error: function (message) {
+                    alert("保存失败");
+                }
+            });
+
+        });
+        var to = false;
+        $('#search_site').keyup(function (event) {
+//            if (to) {
+//                clearTimeout(to);
+//            }
+//            to = setTimeout(function () {
+//                var v = $('#search_site').val();
+//                $('#tree').jstree(true).search(v);
+//            }, 250);
+
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                var condition = $('#search_site').val();
+                location.href = "?condition=" + condition;
+            }
+        });
+
+
+        $(window).resize(function () {
+            var h = Math.max($(window).height() - 0, 600);
+            $('#container, #data, #tree, #data .content').height(h).filter('.default').css('lineHeight', h + 'px');
+        }).resize();
+
+
+        $('#tree').jstree({
+                    'core': {
+                        'data': {
+                            'url': REMOTEPATH + 'siteConfig/getTreeNode?condition=' + $('#search_site').val(),
+                            'data': function (node) {
+                                return {'id': node.id};
+                            }
+                        },
+                        'check_callback': function (o, n, p, i, m) {
+                            if (m && m.dnd && m.pos !== 'i') {
+                                return false;
+                            }
+                            if (o === "move_node" || o === "copy_node") {
+                                if (this.get_node(n).parent === this.get_node(p).id) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        },
+                        'themes': {
+                            'responsive': false,
+                            'variant': 'small',
+                            'stripes': true
+                        }
+                    },
+                    'sort': function (a, b) {
+                        return this.get_type(a) === this.get_type(b) ? (this.get_text(a) > this.get_text(b) ? 1 : -1) : (this.get_type(a) >= this.get_type(b) ? 1 : -1);
+                    },
+                    'contextmenu': {
+                        'items': function (node) {
+                            var tmp = $.jstree.defaults.contextmenu.items();
+                            delete tmp.create.action;
+                            tmp.create.label = "New";
+                            tmp.create.submenu = {
+                                "create_folder": {
+                                    "separator_after": true,
+                                    "label": "Folder",
+                                    "action": function (data) {
+                                        var inst = $.jstree.reference(data.reference),
+                                                obj = inst.get_node(data.reference);
+                                        inst.create_node(obj, {type: "default"}, "last", function (new_node) {
+                                            setTimeout(function () {
+                                                inst.edit(new_node);
+                                            }, 0);
+                                        });
+                                    }
+                                },
+                                "create_file": {
+                                    "label": "File",
+                                    "action": function (data) {
+                                        var inst = $.jstree.reference(data.reference),
+                                                obj = inst.get_node(data.reference);
+                                        inst.create_node(obj, {type: "file"}, "last", function (new_node) {
+                                            setTimeout(function () {
+                                                inst.edit(new_node);
+                                            }, 0);
+                                        });
+                                    }
+                                }
+                            };
+                            if (this.get_type(node) === "file") {
+                                delete tmp.create;
+                            }
+                            return tmp;
+                        }
+                    },
+                    'types': {
+                        'default': {'icon': 'folder'},
+                        'file': {'valid_children': [], 'icon': 'file'}
+                    },
+                    'unique': {
+                        'duplicate': function (name, counter) {
+                            return name + ' ' + counter;
+                        }
+                    },
+                    'plugins': ['state', 'dnd', 'sort', 'types', 'contextmenu', 'unique', "search"]
+                })
+                .on('delete_node.jstree', function (e, data) {
+                    $.get(REMOTEPATH + 'siteConfig/deleteSiteFile?path=' + data.node.id)
+                            .fail(function () {
+                                data.instance.refresh();
+                            });
+                })
+                .on('create_node.jstree', function (e, data) {
+                    var isDic = data.node.type == 'default' ? "1" : "0";
+                    $.get(REMOTEPATH + 'siteConfig/createSiteFile?path=' + data.parent + '&isDic=' + isDic)
+                            .done(function (d) {
+                                data.instance.set_id(data.node, d.path);
+                                data.instance.set_text(data.node, d.name);
+                            })
+                            .fail(function () {
+                                data.instance.refresh();
+                            });
+                })
+                .on('rename_node.jstree', function (e, data) {
+                    $.get(REMOTEPATH + 'siteConfig/renameSiteFile?originPath=' + data.node.id + '&targetPath=' + data.text)
+                            .done(function (d) {
+                                data.instance.set_id(data.node, d.path);
+                                data.instance.set_text(data.node, d.name);
+                            })
+                            .fail(function () {
+                                data.instance.refresh();
+                            });
+                })
+                .on('move_node.jstree', function (e, data) {
+                    alert('暂时不支持');
+//                    $.get('?operation=move_node', {'id': data.node.id, 'parent': data.parent})
+//                            .done(function (d) {
+//                                //data.instance.load_node(data.parent);
+//                                data.instance.refresh();
+//                            })
+//                            .fail(function () {
+//                                data.instance.refresh();
+//                            });
+                })
+                .on('copy_node.jstree', function (e, data) {
+                    alert('暂时不支持');
+//                    $.get('?operation=copy_node', {'id': data.original.id, 'parent': data.parent})
+//                            .done(function (d) {
+//                                //data.instance.load_node(data.parent);
+//                                data.instance.refresh();
+//                            })
+//                            .fail(function () {
+//                                data.instance.refresh();
+//                            });
+                })
+                .on('changed.jstree', function (e, data) {
+                    if (data && data.selected && data.selected.length) {
+                        var path = data.selected.join(':');
+                        if (path.indexOf('.json') == -1) {
+                            return;
+                        }
+                        $.get(REMOTEPATH + 'siteConfig/getSiteContent?path=' + path, function (d) {
+                                    $('#site_path').val(path);
+                                    $('#code').html('');
+                                    var marginLeft = parseInt($('#tree').css('width').split('px')[0]) + 10;
+                                    $('#data').css('margin-left', marginLeft + 'px');
+                                    if (d) {
+                                        try {
+                                            $('#data .code').show();
+                                            $('#code').JSONView($.parseJSON(d));
+                                        } catch (e) {
+                                            $(".jsonview").hide();
+                                            $('#code').append('<h4 style="color: red;">json format error , ' + e + '</h4>');
+                                        }
+                                        var textarea = "<textarea id='codeEdit' style='display:none; height:800px;width: 1000px; '></textarea>";
+                                        $('#code').append(textarea);
+                                        $('#codeEdit').val($.parseJSON(d));
+                                    }
+
+
+//                            if (d && typeof d.type !== 'undefined') {
+//                                $('#data .content').hide();
+//                                switch (d.type) {
+//                                    case 'text':
+//                                    case 'txt':
+//                                    case 'md':
+//                                    case 'htaccess':
+//                                    case 'log':
+//                                    case 'sql':
+//                                    case 'php':
+//                                    case 'js':
+//                                    case 'json':
+//                                    case 'css':
+//                                    case 'html':
+//                                        $('#data .code').show();
+//                                        $('#code').val(d.content);
+//                                        break;
+//                                    case 'png':
+//                                    case 'jpg':
+//                                    case 'jpeg':
+//                                    case 'bmp':
+//                                    case 'gif':
+//                                        $('#data .image img').one('load', function () {
+//                                            $(this).css({
+//                                                'marginTop': '-' + $(this).height() / 2 + 'px',
+//                                                'marginLeft': '-' + $(this).width() / 2 + 'px'
+//                                            });
+//                                        }).attr('src', d.content);
+//                                        $('#data .image').show();
+//                                        break;
+//                                    default:
+//                                        $('#data .default').html(d.content).show();
+//                                        break;
+//                                }
+//                        }
+                                }
+                        );
+                    }
+                    else {
+                        $('#data .content').hide();
+                        $('#data .default').html('Select a file from the tree.').show();
+                    }
+                })
+
+    })
+</script>
+
+
+</body>

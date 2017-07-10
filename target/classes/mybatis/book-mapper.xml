@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhoukai.dao.IBookDao">
+    <select id="getBooks" resultType="com.zhoukai.entity.Book">
+        select * from book
+    </select>
+
+    <select id="getBook" resultType="com.zhoukai.entity.Book" parameterType="Integer">
+        select * from book where id = #{id}
+    </select>
+</mapper>

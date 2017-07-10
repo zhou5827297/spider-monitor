@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>site</title>
+    <link rel="stylesheet" type="text/css" href="/css/monitor.css">
+    <script type="text/javascript" src="/js/angular.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+        var app = angular.module('monitorApp', []);
+        var index = 1;
+        var lastPage = 1;
+        var pageSearch = function ($scope, $http, pageNum) {
+            var url = REMOTEPATH + "site/get?pageSize=100&pageNum=" + pageNum;
+            var params = constructReqParams($scope.model);
+            url = url + params;
+            $http.get(url)
+                    .success(function (response) {
+                        $scope.datas = response.result;
+                        $scope.total = response.total;
+                        lastPage = response.pages;
+                    });
+        }
+
+        app.controller('monitorCtrl', function ($scope, $http) {
+            pageSearch($scope, $http, 1);
+            $scope.prev = function () {
+                if (index <= 1) {
+                    index = 2;
+                }
+                index = index - 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.next = function () {
+                index = index + 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.first = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.last = function () {
+                index = lastPage;
+                pageSearch($scope, $http, index);
+            }
+            $scope.search = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+        });
+
+    </script>
+</head>
+<body>
+<div ng-app="monitorApp" ng-controller="monitorCtrl">
+    <table>
+        <caption>
+            <h3>site:{{total}}</h3>
+            <div>
+                <input type="text" ng-model="model.id" placeholder="id"/>
+                <input type="text" ng-model="model.title" placeholder="title"/>
+                <input type="text" ng-model="model.context" placeholder="context"/>
+                <button type="button" class="btn green" ng-click="search()">查询</button>
+            </div>
+        </caption>
+        <tr>
+            <th><a href="#" ng-click="first()">首页</a>&nbsp;&nbsp;<a href="#" ng-click="prev()">上一页</a></th>
+            <th>sequence</th>
+            <th ng-click="col='id';desc=!desc">id</th>
+            <th ng-click="col='title';desc=!desc">title</th>
+            <th ng-click="col='context';desc=!desc">context</th>
+            <th ng-click="col='deleted';desc=!desc">deleted</th>
+            <th>function</th>
+            <th><a href="#" ng-click="next()">下一页</a>&nbsp;&nbsp;<a href="#" ng-click="last()">尾页</a></th>
+        </tr>
+        <tr ng-repeat="data in datas | orderBy:col:desc" onmouseover="style.backgroundColor='#FF9900'"
+            onmouseout="style.backgroundColor='#FFFFFF'">
+            <td></td>
+            <td>{{$index+1}}</td>
+            <td>{{data.id}}</td>
+            <td>{{data.title}}</td>
+            <td><a href="{{data.context}}" target="_blank">{{data.context}}</a></td>
+            <td>{{data.deleted}}</td>
+            <td><a href="process.html?#siteId={{data.id}}" target="_blank">执行流程</a></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+</body>

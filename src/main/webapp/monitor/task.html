@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>task</title>
+    <link rel="stylesheet" type="text/css" href="/css/monitor.css">
+    <script type="text/javascript" src="/js/angular.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" src="/js/md5-utf8.js"></script>
+    <script>
+
+        var dealResponse = function (response) {
+            angular.forEach(response.result, function (data, index, array) {
+                if (data.snapshotPath) {
+                    var path = ROOTPATH + data.snapshotPath;
+                    path = path.replace(REPLACESTR, '');
+                    data.snapshotPath = path;
+                }
+            });
+            return response;
+        }
+
+
+        var app = angular.module('monitorApp', []);
+        var index = 1;
+        var lastPage = 1;
+        var pageSearch = function ($scope, $http, pageNum) {
+            var url = REMOTEPATH + "task/get?pageSize=100&pageNum=" + pageNum;
+
+            if (!$scope.model) {
+                $scope.model = {};
+            }
+            // url和title需要特殊处理
+            if ($scope.urlMd5) {
+                var urlMd5 = md5($scope.urlMd5).toUpperCase();
+                $scope.model.urlMd5 = urlMd5;
+            }
+            if ($scope.titleMd5) {
+                var titleMd5 = md5($scope.titleMd5).toUpperCase();
+                $scope.model.titleMd5 = titleMd5;
+            }
+
+            //======================
+
+            var params = constructReqParams($scope.model);
+            url = url + params;
+            $http.get(url)
+                    .success(function (response) {
+                        dealResponse(response);
+                        $scope.datas = response.result;
+                        $scope.total = response.total;
+                        lastPage = response.pages;
+                    });
+        }
+
+        app.controller('monitorCtrl', function ($scope, $http, $location) {
+            if ($location.absUrl().match(/processId=(\d+)/)) {
+                var processId = $location.absUrl().match(/processId=(\d+)/)[1];
+                $scope.model = {};
+                $scope.model.processId = processId;
+            }
+
+            pageSearch($scope, $http, 1);
+
+            $scope.prev = function () {
+                if (index <= 1) {
+                    index = 2;
+                }
+                index = index - 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.next = function () {
+                index = index + 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.first = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.last = function () {
+                index = lastPage;
+                pageSearch($scope, $http, index);
+            }
+            $scope.search = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+
+        }).filter('trustStatus', function ($sce) {
+            return function (input) {
+                return trustStatus(input);
+            }
+        });
+
+
+    </script>
+</head>
+<body>
+<div ng-app="monitorApp" ng-controller="monitorCtrl">
+    <table>
+        <caption>
+            <h3>task:{{total}}</h3>
+            <div>
+                <input type="text" ng-model="model.id" placeholder="id"/>
+                <input type="text" ng-model="model.processId" placeholder="processId"/>
+                <input type="text" ng-model="model.siteId" placeholder="siteId"/>
+                <input type="text" ng-model="urlMd5" placeholder="url"/>
+                <input type="text" ng-model="titleMd5" placeholder="title"/>
+                <select ng-model="model.status" ng-click="search()">
+                    <option value="">全部</option>
+                    <option value="1">待执行</option>
+                    <option value="2">执行中</option>
+                    <option value="3">执行成功</option>
+                    <option value="4">执行失败</option>
+                    <option value="5">执行超时</option>
+                </select>
+                <button type="button" class="btn green" ng-click="search()">查询</button>
+            </div>
+        </caption>
+        <tr>
+            <th><a href="#" ng-click="first()">首页</a>&nbsp;&nbsp;<a href="#" ng-click="prev()">上一页</a></th>
+            <th>sequence</th>
+            <th ng-click="col='id';desc=!desc">id</th>
+            <th ng-click="col='processId';desc=!desc">processId</th>
+            <th ng-click="col='siteId';desc=!desc">siteId</th>
+            <th ng-click="col='url';desc=!desc">url</th>
+            <th ng-click="col='title';desc=!desc">title</th>
+            <th ng-click="col='beginTime';desc=!desc">beginTime</th>
+            <th ng-click="col='endTime';desc=!desc">endTime</th>
+            <th ng-click="col='executeTime';desc=!desc">executeTime</th>
+            <th ng-click="col='snapshotPath';desc=!desc">snapshotPath</th>
+            <th ng-click="col='status';desc=!desc">status</th>
+            <th ng-click="col='message';desc=!desc">message</th>
+            <th>function</th>
+            <th><a href="#" ng-click="next()">下一页</a>&nbsp;&nbsp;<a href="#" ng-click="last()">尾页</a></th>
+        </tr>
+        <tr ng-repeat="data in datas | orderBy:col:desc" onmouseover="style.backgroundColor='#FF9900'"
+            onmouseout="style.backgroundColor='#FFFFFF'">
+            <td></td>
+            <td>{{$index+1}}</td>
+            <td>{{data.id}}</td>
+            <td>{{data.processId}}</td>
+            <td>{{data.siteId}}</td>
+            <td><a href="{{data.url}}" target="_blank">{{data.url}}</a></td>
+            <td>{{data.title}}</td>
+            <td>{{data.beginTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{data.endTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{data.executeTime}}</td>
+            <td><a href="{{data.snapshotPath}}" target="_blank" ng-if="data.snapshotPath">抓取快照</a></td>
+            <td>{{data.status | trustStatus}}</td>
+            <td>{{data.message}}</td>
+            <td><a href="taskPush.html?#taskId={{data.id}}" target="_blank">推送流程</a></td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+</body>

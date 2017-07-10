@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhoukai.mapper.monitor.SiteMapper">
+    <resultMap id="BaseResultMap" type="com.zhoukai.entity.Site">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="context" property="context" jdbcType="VARCHAR"/>
+        <result column="file_content" property="fileContent" jdbcType="VARCHAR"/>
+        <result column="file_path" property="filePath" jdbcType="VARCHAR"/>
+        <result column="deleted" property="deleted" jdbcType="BIT"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, title, context, file_content, file_path, deleted
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from site
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from site
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="com.zhoukai.entity.Site">
+    insert into site (id, title, context, 
+      file_content, file_path, deleted
+      )
+    values (#{id,jdbcType=BIGINT}, #{title,jdbcType=VARCHAR}, #{context,jdbcType=VARCHAR}, 
+      #{fileContent,jdbcType=VARCHAR}, #{filePath,jdbcType=VARCHAR}, #{deleted,jdbcType=BIT}
+      )
+  </insert>
+    <insert id="insertSelective" parameterType="com.zhoukai.entity.Site">
+        insert into site
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="context != null">
+                context,
+            </if>
+            <if test="fileContent != null">
+                file_content,
+            </if>
+            <if test="filePath != null">
+                file_path,
+            </if>
+            <if test="deleted != null">
+                deleted,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="context != null">
+                #{context,jdbcType=VARCHAR},
+            </if>
+            <if test="fileContent != null">
+                #{fileContent,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null">
+                #{filePath,jdbcType=VARCHAR},
+            </if>
+            <if test="deleted != null">
+                #{deleted,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.zhoukai.entity.Site">
+        update site
+        <set>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="context != null">
+                context = #{context,jdbcType=VARCHAR},
+            </if>
+            <if test="fileContent != null">
+                file_content = #{fileContent,jdbcType=VARCHAR},
+            </if>
+            <if test="filePath != null">
+                file_path = #{filePath,jdbcType=VARCHAR},
+            </if>
+            <if test="deleted != null">
+                deleted = #{deleted,jdbcType=BIT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.zhoukai.entity.Site">
+    update site
+    set title = #{title,jdbcType=VARCHAR},
+      context = #{context,jdbcType=VARCHAR},
+      file_content = #{fileContent,jdbcType=VARCHAR},
+      file_path = #{filePath,jdbcType=VARCHAR},
+      deleted = #{deleted,jdbcType=BIT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+    <select id="select" parameterType="com.zhoukai.entity.Site" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from site
+        <where>
+            <if test="id != null">and id = #{id,jdbcType=BIGINT}</if>
+            <if test="title != null">and title = #{title,jdbcType=VARCHAR}</if>
+            <if test="context != null">and context = #{context,jdbcType=VARCHAR}</if>
+            <if test="fileContent != null">and file_content = #{fileContent,jdbcType=VARCHAR}</if>
+            <if test="filePath != null">and file_path = #{filePath,jdbcType=VARCHAR}</if>
+            <if test="deleted != null">and deleted = #{deleted,jdbcType=BIT}</if>
+        </where>
+        order by id
+    </select>
+
+</mapper>

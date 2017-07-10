@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>爬虫实时抓取数据监控</title>
+    <script type="text/javascript" src="js/angular.min.js"></script>
+    <script type="text/javascript" src="js/echarts.min.js"></script>
+</head>
+<body>
+<center><h3>爬虫实时抓取数据监控</h3></center>
+<div ng-app="spiderApp" ng-controller="spiderCtrl">
+    <div id="bar" style="width: 100%;height:800px;"></div>
+</div>
+<script>
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "M+": this.getMonth() + 1, //月份
+            "d+": this.getDate(), //日
+            "H+": this.getHours(), //小时
+            "m+": this.getMinutes(), //分
+            "s+": this.getSeconds(), //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+
+
+    var dataAxis = [];
+    var data = [];
+    option = {
+        title: {
+            text: '源网站抓取数据量'
+        },
+        tooltip: {
+            trigger: 'axis',
+            formatter: function (params) {
+                params = params[0];
+                return params.name + " : " + params.data;
+            },
+            axisPointer: {
+                animation: false
+            }
+        },
+        xAxis: {
+            data: dataAxis,
+            axisLabel: {
+                inside: true,
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            axisTick: {
+                show: false
+            },
+            axisLine: {
+                show: false
+            },
+            z: 10
+        },
+        yAxis: {
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            },
+            axisLabel: {
+                textStyle: {
+                    color: '#999'
+                }
+            }
+        },
+        dataZoom: [
+            {
+                type: 'inside'
+            }
+        ],
+        series: [
+            {
+                type: 'bar',
+                itemStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1,
+                                [
+                                    {offset: 0, color: '#83bff6'},
+                                    {offset: 0.5, color: '#188df0'},
+                                    {offset: 1, color: '#188df0'}
+                                ]
+                        )
+                    },
+                    emphasis: {
+                        color: new echarts.graphic.LinearGradient(
+                                0, 0, 0, 1,
+                                [
+                                    {offset: 0, color: '#2378f7'},
+                                    {offset: 0.7, color: '#2378f7'},
+                                    {offset: 1, color: '#83bff6'}
+                                ]
+                        )
+                    }
+                },
+                data: data
+            }
+        ]
+    };
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('bar'));
+    myChart.setOption(option);
+
+
+    // Enable data zoom when user click bar.
+    var zoomSize = 6;
+    myChart.on('click', function (params) {
+        console.log(dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)]);
+        myChart.dispatchAction({
+            type: 'dataZoom',
+            startValue: dataAxis[Math.max(params.dataIndex - zoomSize / 2, 0)],
+            endValue: dataAxis[Math.min(params.dataIndex + zoomSize / 2, data.length - 1)]
+        });
+    });
+
+
+    //异步加载数据
+    var app = angular.module('spiderApp', []);
+    app.controller('spiderCtrl', function ($scope, $http, $location) {
+        var date = $location.absUrl().match(/date=(.*)/);
+        var dateObj = new Date();
+        if (date && date[1] != ('undefined')) {
+            date = date[1];
+        } else {
+            date = dateObj.Format("yyyy-MM-dd");
+        }
+        $http.get("spiderFetchCount/pushSourceFetchCountByDate?date=" + date)
+                .success(function (response) {
+                    // 填入数据
+                    dataAxis = response.itemBar.names;
+                    data = response.itemBar.values;
+
+                    myChart.setOption({
+                        title: {
+                            text: 'total：' + response.total
+                        },
+                        xAxis: {
+                            data: dataAxis
+                        }, series: [{
+                            data: data
+                        }]
+                    });
+                    dateObj = new Date(response.lastTime);
+                    date = dateObj.Format("yyyy-MM-dd HH:mm:ss");
+                });
+    });
+
+</script>
+</body>
+</html>

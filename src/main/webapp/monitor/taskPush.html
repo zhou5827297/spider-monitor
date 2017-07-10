@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>taskPush</title>
+    <link rel="stylesheet" type="text/css" href="/css/monitor.css">
+    <script type="text/javascript" src="/js/angular.min.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script>
+
+        var app = angular.module('monitorApp', []);
+        var index = 1;
+        var lastPage = 1;
+        var pageSearch = function ($scope, $http, pageNum) {
+            var url = REMOTEPATH + "taskPush/get?pageSize=100&pageNum=" + pageNum;
+            var params = constructReqParams($scope.model);
+            url = url + params;
+            $http.get(url)
+                    .success(function (response) {
+                        $scope.datas = response.result;
+                        $scope.total = response.total;
+                        lastPage = response.pages;
+                    });
+        }
+
+        app.controller('monitorCtrl', function ($scope, $http, $location) {
+            if ($location.absUrl().match(/taskId=(\d+)/)) {
+                var taskId = $location.absUrl().match(/taskId=(\d+)/)[1];
+                $scope.model = {};
+                $scope.model.taskId = taskId;
+            }
+
+            pageSearch($scope, $http, 1);
+
+            $scope.prev = function () {
+                if (index <= 1) {
+                    index = 2;
+                }
+                index = index - 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.next = function () {
+                index = index + 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.first = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+            $scope.last = function () {
+                index = lastPage;
+                pageSearch($scope, $http, index);
+            }
+            $scope.search = function () {
+                index = 1;
+                pageSearch($scope, $http, index);
+            }
+
+        }).filter('trustStatus', function ($sce) {
+            return function (input) {
+                return trustStatus(input);
+            }
+        });
+
+    </script>
+</head>
+<body>
+<div ng-app="monitorApp" ng-controller="monitorCtrl">
+    <table>
+        <caption>
+            <h3>taskPush:{{total}}</h3>
+            <div>
+                <input type="text" ng-model="model.taskId" placeholder="taskId"/>
+                <input type="text" ng-model="model.siteId" placeholder="siteId"/>
+                <select ng-model="model.status" ng-click="search()">
+                    <option value="">全部</option>
+                    <option value="1">待执行</option>
+                    <option value="2">执行中</option>
+                    <option value="3">执行成功</option>
+                    <option value="4">执行失败</option>
+                    <option value="5">执行超时</option>
+                </select>
+                <button type="button" class="btn green" ng-click="search()">查询</button>
+            </div>
+        </caption>
+        <tr>
+            <th><a href="#" ng-click="first()">首页</a>&nbsp;&nbsp;<a href="#" ng-click="prev()">上一页</a></th>
+            <th>sequence</th>
+            <th ng-click="col='id';desc=!desc">id</th>
+            <th ng-click="col='taskId';desc=!desc">taskId</th>
+            <th ng-click="col='siteId';desc=!desc">siteId</th>
+            <th ng-click="col='beginTime';desc=!desc">beginTime</th>
+            <th ng-click="col='endTime';desc=!desc">endTime</th>
+            <th ng-click="col='executeTime';desc=!desc">executeTime</th>
+            <th ng-click="col='status';desc=!desc">status</th>
+            <th ng-click="col='message';desc=!desc">message</th>
+            <th><a href="#" ng-click="next()">下一页</a>&nbsp;&nbsp;<a href="#" ng-click="last()">尾页</a></th>
+        </tr>
+        <tr ng-repeat="data in datas | orderBy:col:desc" onmouseover="style.backgroundColor='#FF9900'"
+            onmouseout="style.backgroundColor='#FFFFFF'">
+            <td></td>
+            <td>{{$index+1}}</td>
+            <td>{{data.id}}</td>
+            <td>{{data.taskId}}</td>
+            <td>{{data.siteId}}</td>
+            <td>{{data.beginTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{data.endTime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{data.executeTime}}</td>
+            <td>{{data.status | trustStatus}}</td>
+            <td>{{data.message}}</td>
+            <td></td>
+        </tr>
+    </table>
+</div>
+</body>
