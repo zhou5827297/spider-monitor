@@ -7,11 +7,12 @@
 5：加入爬虫配置系统，可以及时推送配置到抓取系统  
 
 # 监控图
-![monitor](monitor.png)
+![monitor](monitor.png)  
+![monitor](servermonitor.png)
 
 
 # 爬虫配置
-![monitor](siteconfig.png)
+![config](siteconfig.png)
 
 # 采用框架
 使用Gradle创建的Spring Boot项目
