@@ -24,12 +24,9 @@ pagehelper:
 
 spring:
   spider-datasource:
-    url: jdbc:mysql://rm-2zeobva30at5p88a1o.mysql.rds.aliyuncs.com:3306/subscribe1?useUnicode=true&characterEncoding=utf-8
-    username: subscribe1
-    password: subscribe1
-#    url: jdbc:mysql://rm-2zeobva30at5p88a1o.mysql.rds.aliyuncs.com:3306/subscribe0?useUnicode=true&characterEncoding=utf-8
-#    username: subscribe0
-#    password: subscribe0
+    url: jdbc:mysql://xxxx:3306/xxxx?useUnicode=true&characterEncoding=utf-8
+    username: mysql
+    password: 123456
     driverClassName: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     initialSize: 30
@@ -51,13 +48,9 @@ spring:
     logAbandoned: true
 
   monitor-datasource:
-      url: jdbc:mysql://192.168.0.156:3306/spider?useUnicode=true&characterEncoding=utf-8
-#      url: jdbc:mysql://192.168.0.156:3306/spider_test?useUnicode=true&characterEncoding=utf-8
+      url: jdbc:mysql://xxxx:3306/spider?useUnicode=true&characterEncoding=utf-8
       username: mysql
       password: 123456
-#      url: jdbc:mysql://192.168.0.50:3306/spider?useUnicode=true&characterEncoding=utf-8
-#      username: hive
-#      password: hive
       driverClassName: com.mysql.cj.jdbc.Driver
       type: com.alibaba.druid.pool.DruidDataSource
       initialSize: 200
@@ -84,12 +77,10 @@ spring:
       force: true
 
 zookeeper:
-  server: 10.0.0.13:2181
-#  server: 192.168.0.50:2181
+  server: 127.0.0.1:2181
 
 redis:
-#  host: 192.168.0.50
-  host: 10.0.0.13
+  host: 127.0.0.1
   port: 6379
   password:
   timeout: 10000
@@ -102,7 +93,7 @@ redis:
 site:
   path:
     local: /data/spider-monitor/sites
-    svn: svn://192.168.0.12/cms/trunk/sites
+    svn: svn://xxxxxx/sites
 
 
 
